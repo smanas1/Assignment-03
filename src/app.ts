@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import booksRoutes from "./app/controllers/books.controller";
+import borrowRoute from "./app/controllers/borrow.controller";
 
 const app = express();
 
@@ -10,5 +11,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api", booksRoutes);
+app.use("/api", borrowRoute);
 
 export default app;

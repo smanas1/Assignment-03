@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import { Book } from "../models/books.model";
-import { IFilter } from "../interfaces/books.interface";
 
 const booksRoutes = express.Router();
 
@@ -36,7 +35,11 @@ booksRoutes.get("/books", async (req: Request, res: Response) => {
     const limit: number = parseInt((req.query.limit as string) || "10");
     const allBooks = await Book.find(filter).sort(sort).limit(limit);
 
-    res.send(allBooks);
+    res.json({
+      success: true,
+      message: "Books retrieved successfully",
+      data: allBooks,
+    });
   } catch (error) {}
 });
 // Post Books
@@ -76,11 +79,11 @@ booksRoutes.put("/books/:bookId", async (req: Request, res: Response) => {
 
 booksRoutes.delete("/books/:bookId", async (req: Request, res: Response) => {
   const bookId = req.params.bookId;
-  const updatedBook = await Book.findByIdAndDelete(bookId, { new: true });
+  const updatedBook = await Book.findByIdAndDelete(bookId);
   res.json({
     success: true,
     message: "Book deleted successfully",
-    data: updatedBook,
+    data: null,
   });
 });
 export default booksRoutes;
