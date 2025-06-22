@@ -1,23 +1,25 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { IBooks } from "../interfaces/books.interface";
+import { IBorrowBook } from "../interfaces/borrow.interface";
 
 const BookSchema = new Schema<IBooks>(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, "Book title is required"],
       trim: true,
       minlength: 3,
     },
     author: {
       type: String,
-      required: true,
+      required: [true, "Author name is required"],
       trim: true,
-      minlength: 3,
+      minlength: [3, "Author name must be at least 3 characters long"],
     },
     genre: {
       type: String,
-      required: true,
+      required: [true, "Genre is required"],
+      uppercase: true,
       enum: [
         "FICTION",
         "NON_FICTION",
@@ -31,25 +33,25 @@ const BookSchema = new Schema<IBooks>(
     },
     isbn: {
       type: String,
-      required: true,
+      required: [true, "ISBN is required"],
       unique: [true, "ISBN Already Exist"],
       trim: true,
       minlength: 10,
     },
     description: {
       type: String,
-      required: true,
+      required: [true, "Book description is required"],
       trim: true,
-      minlength: 10,
+      minlength: [10, "Description must be at least 10 characters long"],
     },
     copies: {
       type: Number,
-      required: true,
-      min: 0,
+      required: [true, "Number of copies is required"],
+      min: [0, "Number of copies cannot be negative"],
     },
     available: {
       type: Boolean,
-      required: true,
+      required: [true, "Availability status is required"],
     },
   },
   {
@@ -78,9 +80,7 @@ BookSchema.statics.borrowBook = async function (
   return book;
 };
 
-export const Book = model<
-  IBooks,
-  Model<IBooks> & {
-    borrowBook(bookId: string, quantity: number): Promise<IBooks | null>;
-  }
->("Book", BookSchema);
+export const Book = model<IBooks, Model<IBooks> & IBorrowBook>(
+  "Book",
+  BookSchema
+);

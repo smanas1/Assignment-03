@@ -1,4 +1,5 @@
-import { Document, Model, Types } from "mongoose";
+import { Types } from "mongoose";
+import { IBooks } from "./books.interface";
 
 export interface IBorrow {
   book: Types.ObjectId;
@@ -12,9 +13,6 @@ export interface BorrowRequest {
   dueDate: string;
 }
 
-export interface IBorrowBook extends Document {
-  book: Types.ObjectId;
-  quantity: number;
-  dueDate: Date;
-  borrowDate: Date;
+export interface IBorrowBook {
+  borrowBook(bookId: string, quantity: number): Promise<IBooks | null>;
 }

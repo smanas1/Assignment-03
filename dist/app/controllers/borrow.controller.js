@@ -15,7 +15,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const books_model_1 = require("../models/books.model");
 const borrow_model_1 = require("../models/borrow.model");
+const getErrorMessage_1 = require("../error/getErrorMessage");
 const borrowRoute = express_1.default.Router();
+// Borrow a Book
+borrowRoute.post("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { book, quantity, dueDate } = req.body;
+        yield books_model_1.Book.borrowBook(book, quantity);
+        const borrowRecord = new borrow_model_1.BorrowBook({
+            book: book,
+            quantity: quantity,
+            dueDate: new Date(dueDate),
+        });
+        const newData = yield borrowRecord.save();
+        res.status(201).json({
+            success: true,
+            message: "Book borrowed successfully",
+            data: newData,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            message: (0, getErrorMessage_1.getErrorMessage)(error),
+            success: false,
+            errors: error,
+        });
+    }
+}));
+// Get Borrowed Books Summary
 borrowRoute.get("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield borrow_model_1.BorrowBook.aggregate([
@@ -54,53 +81,11 @@ borrowRoute.get("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
     catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({
-                message: error.message,
-                success: false,
-                error: error,
-            });
-        }
-        else {
-            res.status(400).json({
-                message: "Validation failed",
-                success: false,
-                error: error,
-            });
-        }
-    }
-}));
-borrowRoute.post("/borrow", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { book, quantity, dueDate } = req.body;
-        yield books_model_1.Book.borrowBook(book, quantity);
-        const borrowRecord = new borrow_model_1.BorrowBook({
-            book: book,
-            quantity: quantity,
-            dueDate: new Date(dueDate),
+        res.status(400).json({
+            message: (0, getErrorMessage_1.getErrorMessage)(error),
+            success: false,
+            errors: error,
         });
-        const newData = yield borrowRecord.save();
-        res.status(201).json({
-            success: true,
-            message: "Book borrowed successfully",
-            data: newData,
-        });
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({
-                message: error.message,
-                success: false,
-                error: error,
-            });
-        }
-        else {
-            res.status(400).json({
-                message: "Validation failed",
-                success: false,
-                error: error,
-            });
-        }
     }
 }));
 exports.default = borrowRoute;

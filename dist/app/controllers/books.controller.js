@@ -14,23 +14,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const books_model_1 = require("../models/books.model");
+const getErrorMessage_1 = require("../error/getErrorMessage");
 const booksRoutes = express_1.default.Router();
-function getErrorMessage(error) {
-    if (error instanceof Error)
-        return error.message;
-    return String(error);
-}
-// Get book by ID
-booksRoutes.get("/books/:bookId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const bookId = req.params.bookId;
-    const book = yield books_model_1.Book.findById(bookId);
-    res.json({
-        success: true,
-        message: "Book retrieved successfully",
-        data: book,
-    });
+// 1 Create Books
+booksRoutes.post("/books", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const books = yield books_model_1.Book.create(req.body);
+        res.status(201).json({
+            success: true,
+            message: "Book created successfully",
+            data: books,
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            message: (0, getErrorMessage_1.getErrorMessage)(error),
+            success: false,
+            errors: error,
+        });
+    }
 }));
-// Get All Books by Query Parameters
+// 2 Get All Books by Query Parameters
 booksRoutes.get("/books", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const filter = {};
@@ -48,44 +52,98 @@ booksRoutes.get("/books", (req, res) => __awaiter(void 0, void 0, void 0, functi
             data: allBooks,
         });
     }
-    catch (error) { }
-}));
-// Post Books
-booksRoutes.post("/books", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const books = yield books_model_1.Book.create(req.body);
-        res.status(201).json({
-            success: true,
-            message: "Book created successfully",
-            data: books,
-        });
-    }
     catch (error) {
-        console.log(error);
         res.status(400).json({
-            message: getErrorMessage(error),
+            message: (0, getErrorMessage_1.getErrorMessage)(error),
             success: false,
             errors: error,
         });
     }
 }));
+// 3 Get book by ID
+booksRoutes.get("/books/:bookId", (req, res) => {
+    (() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const bookId = req.params.bookId;
+            const book = yield books_model_1.Book.findById(bookId);
+            if (!book) {
+                return res.status(404).json({
+                    message: "Book not found",
+                    success: false,
+                    data: null,
+                });
+            }
+            res.json({
+                success: true,
+                message: "Book retrieved successfully",
+                data: book,
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                message: (0, getErrorMessage_1.getErrorMessage)(error),
+                success: false,
+                errors: error,
+            });
+        }
+    }))();
+});
 // Update Books
 booksRoutes.put("/books/:bookId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const bookId = req.params.bookId;
-    const book = yield books_model_1.Book.findOneAndUpdate({ _id: bookId }, { $set: req.body }, { new: true });
-    res.json({
-        success: true,
-        message: "Book updated successfully",
-        data: book,
-    });
+    (() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const bookId = req.params.bookId;
+            const existingBook = yield books_model_1.Book.findById(bookId);
+            if (!existingBook) {
+                return res.status(404).json({
+                    message: "Book not found",
+                    success: false,
+                    data: null,
+                });
+            }
+            const book = yield books_model_1.Book.findOneAndUpdate({ _id: bookId }, { $set: req.body }, { new: true });
+            res.json({
+                success: true,
+                message: "Book updated successfully",
+                data: book,
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                message: (0, getErrorMessage_1.getErrorMessage)(error),
+                success: false,
+                errors: error,
+            });
+        }
+    }))();
 }));
+// Delete Books
 booksRoutes.delete("/books/:bookId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const bookId = req.params.bookId;
-    const updatedBook = yield books_model_1.Book.findByIdAndDelete(bookId);
-    res.json({
-        success: true,
-        message: "Book deleted successfully",
-        data: null,
-    });
+    (() => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const bookId = req.params.bookId;
+            const existingBook = yield books_model_1.Book.findById(bookId);
+            if (!existingBook) {
+                return res.status(404).json({
+                    message: "Book not found",
+                    success: false,
+                    data: null,
+                });
+            }
+            yield books_model_1.Book.findByIdAndDelete(bookId);
+            res.json({
+                success: true,
+                message: "Book deleted successfully",
+                data: null,
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                message: (0, getErrorMessage_1.getErrorMessage)(error),
+                success: false,
+                errors: error,
+            });
+        }
+    }))();
 }));
 exports.default = booksRoutes;
