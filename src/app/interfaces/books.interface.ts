@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Model } from "mongoose";
 
 export interface IBooks extends Document {
   title: string;
@@ -15,6 +15,10 @@ export interface IBooks extends Document {
   description: string;
   copies: number;
   available: boolean;
+}
+
+export interface borrowBook extends Model<IBooks> {
+  borrowBook: (bookId: string, quantity: number) => Promise<IBooks>;
 }
 
 export interface IFilter {

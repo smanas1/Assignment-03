@@ -1,4 +1,4 @@
-import { Model, model, Schema } from "mongoose";
+import { Document, Model, model, Schema } from "mongoose";
 import { IBooks } from "../interfaces/books.interface";
 
 const BookSchema = new Schema<IBooks>(
@@ -78,4 +78,9 @@ BookSchema.statics.borrowBook = async function (
   return book;
 };
 
-export const Book = model<IBooks>("Book", BookSchema);
+export const Book = model<
+  IBooks,
+  Model<IBooks> & {
+    borrowBook(bookId: string, quantity: number): Promise<IBooks | null>;
+  }
+>("Book", BookSchema);

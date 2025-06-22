@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import { Document, Model, Types } from "mongoose";
 
 export interface IBorrow {
   book: Types.ObjectId;
